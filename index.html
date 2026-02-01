@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>東京 6 天 5 夜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        /* 隱藏捲軸但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 模擬手機邊框陰影 */
+        .mobile-frame {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="flex justify-center min-h-screen bg-gray-100 py-0 md:py-8">
+
+    <!-- 手機容器 -->
+    <div class="w-full max-w-md bg-white md:rounded-[2.5rem] overflow-hidden mobile-frame relative h-screen md:h-[850px] flex flex-col">
+        
+        <!-- 頂部 Header (參考圖片風格) -->
+        <div class="bg-gradient-to-br from-rose-100 via-orange-50 to-white px-6 pt-10 pb-8 flex-shrink-0 relative">
+            <div class="flex justify-between items-start mb-1">
+                <h1 class="text-xl font-bold text-gray-800">東京 6 天 5 夜</h1>
+            </div>
+            <div class="flex items-center text-gray-500 text-sm bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full w-fit">
+                <i class="far fa-clock mr-2"></i>
+                <span>2026/02/05 (四) ~ 02/10 (二)</span>
+            </div>
+            
+            <!-- 裝飾背景圓 -->
+            <div class="absolute top-[-20px] right-[-20px] w-32 h-32 bg-rose-200 rounded-full opacity-20 blur-xl pointer-events-none"></div>
+        </div>
+
+        <!-- 住宿卡片 (懸浮感) -->
+        <div class="px-5 -mt-6 flex-shrink-0 z-10 relative">
+            <div class="bg-white rounded-2xl shadow-lg p-4 border border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+                        <i class="fas fa-hotel"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 font-bold tracking-wider">住宿地點</div>
+                        <div class="text-sm font-bold text-gray-800">Tobu Hotel Levant Tokyo</div>
+                        <div class="text-xs text-gray-500">錦糸町站北口</div>
+                    </div>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                    <i class="fas fa-location-arrow text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日期導航 Tabs -->
+        <div class="px-5 mt-6 flex-shrink-0">
+            <div class="flex overflow-x-auto no-scrollbar gap-3 pb-2" id="dateTabs">
+                <!-- JS 生成 Tabs -->
+            </div>
+        </div>
+
+        <!-- 行程內容區 (可滾動) -->
+        <div class="flex-1 overflow-y-auto px-5 pt-2 pb-20 no-scrollbar relative" id="contentArea">
+            <!-- JS 生成內容 -->
+        </div>
+
+        <!-- 底部漸層遮罩 (讓滾動看起來更順) -->
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none md:rounded-b-[2.5rem]"></div>
+    </div>
+
+    <script>
+        // 資料結構
+        const itinerary = [
+            {
+                id: 1,
+                dayLabel: "Day 1",
+                dateLabel: "02/05",
+                title: "抵達東京",
+                events: [
+                    { time: "18:15", title: "抵達成田機場", type: "flight", desc: "GK018 航班 (14:00 高雄出發)" },
+                    { time: "19:15", title: "領完行李出關", type: "info", desc: "前往 B1 搭乘 JR 線" },
+                    { 
+                        time: "交通", 
+                        title: "前往錦糸町", 
+                        type: "transport", 
+                        isComplex: true,
+                        content: `
+                            <div class="space-y-2">
+                                <div class="bg-green-50 p-3 rounded-xl border border-green-100">
+                                    <div class="flex items-center mb-1">
+                                        <span class="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold mr-2">優先</span>
+                                        <span class="text-xs font-bold text-green-800">完美直達方案</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600 leading-relaxed">看月台顯示「往久里濱 / 逗子 / 橫須賀」快速列車，直接搭，免轉車 (約 85 分)。</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                    <div class="text-xs font-bold text-gray-600 mb-1">備案 (若需久候)</div>
+                                    <p class="text-xs text-gray-500">依 Google Maps 指示，搭到「東京站」或「千葉」轉車。</p>
+                                </div>
+                            </div>
+                        `
+                    },
+                    { time: "晚餐", title: "錦糸町周邊", type: "food", desc: "車站周邊用餐，早點休息。" }
+                ]
+            },
+            {
+                id: 2,
+                dayLabel: "Day 2",
+                dateLabel: "02/06",
+                title: "河口湖一日遊",
+                events: [
+                    { time: "全日", title: "KKday/Klook 跟團", type: "bus", desc: "依訂單集合時間地點，自行前往集合。" },
+                    { time: "晚餐", title: "市區解決", type: "food", desc: "保留體力。" }
+                ]
+            },
+            {
+                id: 3,
+                dayLabel: "Day 3",
+                dateLabel: "02/07",
+                title: "澀谷潮流 & 夜景",
+                events: [
+                    { time: "10:30", title: "出門", type: "info", desc: "" },
+                    { time: "交通", title: "前往澀谷", type: "subway", desc: "錦糸町 ➝ (半藏門線) ➝ 澀谷站 (直達)" },
+                    { time: "11:00", title: "BAPE STORE®", type: "shop", desc: "開門先買先贏。" },
+                    { time: "下午", title: "逛街行程", type: "walk", desc: "PARCO、宮下公園。" },
+                    { time: "傍晚", title: "SHIBUYA SKY", type: "camera", desc: "憑預約 QR Code 入場看夜景。" }
+                ]
+            },
+            {
+                id: 4,
+                dayLabel: "Day 4",
+                dateLabel: "02/08",
+                title: "淺草 & 晴空塔 (下町散策)",
+                events: [
+                    { time: "10:00", title: "出門", type: "info", desc: "" },
+                    { 
+                        time: "交通", 
+                        title: "前往淺草 (二選一)", 
+                        type: "transport", 
+                        isComplex: true,
+                        content: `
+                            <div class="space-y-2">
+                                <div class="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                                    <div class="flex items-center mb-1">
+                                        <span class="text-xs font-bold text-blue-800">方案 A (最省力)</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">錦糸町北口搭 <strong>都營巴士 (都08)</strong> ➝ 直達「東武淺草站前」。</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                    <div class="flex items-center mb-1">
+                                        <span class="text-xs font-bold text-gray-700">方案 B (搭地鐵)</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500">半藏門線 (押上轉) ➝ 都營淺草線 (淺草)。</p>
+                                </div>
+                            </div>
+                        `
+                    },
+                    { 
+                        time: "上午", 
+                        title: "淺草老街巡禮", 
+                        type: "camera", 
+                        isComplex: true,
+                        content: `
+                            <ul class="space-y-2 mt-1">
+                                <li class="text-xs text-gray-600 flex items-start">
+                                    <i class="fas fa-camera text-rose-400 mt-0.5 mr-2 text-[10px]"></i>
+                                    <span><strong>雷門</strong>：拍觀光客必拍大燈籠。</span>
+                                </li>
+                                <li class="text-xs text-gray-600 flex items-start">
+                                    <i class="fas fa-utensils text-orange-400 mt-0.5 mr-2 text-[10px]"></i>
+                                    <span><strong>仲見世通</strong>：吉備糰子、炸肉餅、人形燒。</span>
+                                </li>
+                                <li class="text-xs text-gray-600 flex items-start">
+                                    <i class="fas fa-praying-hands text-purple-400 mt-0.5 mr-2 text-[10px]"></i>
+                                    <span><strong>淺草寺</strong>：參拜、求籤 (這裡的籤詩很有名)。</span>
+                                </li>
+                            </ul>
+                        `
+                    },
+                    { time: "午餐", title: "淺草周邊美食", type: "food", desc: "推薦：大黑家天婦羅、或文字燒。" },
+                    { 
+                        time: "下午", 
+                        title: "散步去晴空塔", 
+                        type: "walk", 
+                        desc: "經「Sumida River Walk」步道橋，沿「Tokyo Mizumachi」一路逛到晴空塔，風景美且順路。" 
+                    },
+                    { 
+                        time: "傍晚", 
+                        title: "晴空塔 (Solamachi)", 
+                        type: "shop", 
+                        isComplex: true, 
+                        content: `
+                             <div class="text-xs text-gray-600 leading-relaxed">
+                                <div class="mb-1"><strong>好逛推薦：</strong></div>
+                                <ul class="list-none space-y-1 pl-1">
+                                    <li>• 4F：寶可夢中心</li>
+                                    <li>• 2F：超市與伴手禮</li>
+                                </ul>
+                             </div>
+                        `
+                    },
+                    { time: "晚餐", title: "Solamachi 或回錦糸町", type: "food", desc: "6F/7F 餐廳層有很多選擇。" }
+                ]
+            },
+            {
+                id: 5,
+                dayLabel: "Day 5",
+                dateLabel: "02/09",
+                title: "鎌倉 & 江之島",
+                events: [
+                    { time: "09:00", title: "出門", type: "info", desc: "" },
+                    { time: "交通", title: "JR 總武線快速", type: "train", desc: "直通橫須賀線 ➝ 鎌倉站 (一車直達)。" },
+                    { time: "行程", title: "充實版路線", type: "star", desc: "小町通 ➝ 鶴岡八幡宮 ➝ 長谷站(大佛) ➝ 鎌倉高校前 ➝ 江之島。" },
+                    { 
+                        time: "警告", 
+                        title: "硬性規定", 
+                        type: "alert", 
+                        isComplex: true,
+                        content: `
+                            <div class="bg-red-50 p-3 rounded-xl border border-red-100">
+                                <ul class="list-disc list-inside text-xs text-red-700 space-y-1 font-medium">
+                                    <li>20:30 前回到錦糸町。</li>
+                                    <li>21:30 前完成行李打包 (隔天 4 點起床)。</li>
+                                </ul>
+                            </div>
+                        ` 
+                    }
+                ]
+            },
+            {
+                id: 6,
+                dayLabel: "Day 6",
+                dateLabel: "02/10",
+                title: "回程 (嚴格執行)",
+                events: [
+                    { time: "04:50", title: "退房", type: "info", desc: "Key 丟櫃台或箱子。" },
+                    { time: "05:00", title: "抵達錦糸町站月台", type: "warn", desc: "絕對準時。" },
+                    { 
+                        time: "05:12", 
+                        title: "搭乘 JR 總武線快速", 
+                        type: "train", 
+                        desc: "往成田機場。(備註：出發前 3 天請用 NAVITIME 或 Google Maps 確認當日班次)" 
+                    },
+                    { time: "06:28", title: "抵達 機場第2大樓", type: "info", desc: "前往 T2 報到。" },
+                    { time: "07:00", title: "完成託運", type: "info", desc: "準備通關。" },
+                    { time: "09:00", title: "起飛 (JL8663)", type: "flight", desc: "平安回家。" }
+                ]
+            }
+        ];
+
+        let currentDayId = 1;
+
+        // 圖示對應
+        function getIcon(type) {
+            const map = {
+                flight: 'fa-plane-departure',
+                info: 'fa-suitcase',
+                transport: 'fa-route',
+                food: 'fa-utensils',
+                bus: 'fa-bus',
+                star: 'fa-star',
+                warn: 'fa-exclamation-triangle',
+                subway: 'fa-train-subway',
+                shop: 'fa-bag-shopping',
+                walk: 'fa-person-walking',
+                camera: 'fa-camera',
+                train: 'fa-train',
+                alert: 'fa-bell'
+            };
+            return map[type] || 'fa-circle';
+        }
+
+        // 顏色對應
+        function getColor(type) {
+            const map = {
+                flight: 'text-blue-500 bg-blue-50',
+                info: 'text-gray-500 bg-gray-100',
+                transport: 'text-green-600 bg-green-50',
+                food: 'text-orange-500 bg-orange-50',
+                bus: 'text-indigo-500 bg-indigo-50',
+                star: 'text-yellow-500 bg-yellow-50',
+                warn: 'text-amber-600 bg-amber-50',
+                subway: 'text-teal-600 bg-teal-50',
+                shop: 'text-pink-500 bg-pink-50',
+                walk: 'text-emerald-500 bg-emerald-50',
+                camera: 'text-purple-500 bg-purple-50',
+                train: 'text-blue-600 bg-blue-50',
+                alert: 'text-red-500 bg-red-50'
+            };
+            return map[type] || 'text-gray-400 bg-gray-50';
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('dateTabs');
+            container.innerHTML = itinerary.map(day => {
+                const isActive = day.id === currentDayId;
+                const activeClass = isActive ? 'bg-rose-500 text-white shadow-md transform scale-105' : 'bg-white text-gray-400 border border-gray-100 hover:bg-gray-50';
+                const textClass = isActive ? 'text-white' : 'text-gray-400';
+                const dateClass = isActive ? 'text-rose-100' : 'text-gray-300';
+                
+                return `
+                    <button onclick="switchDay(${day.id})" class="flex-shrink-0 w-[4.5rem] h-[4.5rem] rounded-2xl flex flex-col items-center justify-center transition-all duration-300 ${activeClass}">
+                        <span class="text-sm font-bold leading-tight">${day.dayLabel}</span>
+                        <span class="text-[10px] font-medium mt-1 ${dateClass}">${day.dateLabel}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderContent() {
+            const container = document.getElementById('contentArea');
+            const dayData = itinerary.find(d => d.id === currentDayId);
+            
+            // Generate header for the day
+            let html = `
+                <div class="mb-6 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center">
+                        <span class="w-1.5 h-6 bg-rose-400 rounded-full mr-3"></span>
+                        ${dayData.title}
+                    </h2>
+                </div>
+                <div class="relative pl-4 space-y-8 animate-slide-up">
+                    <!-- 垂直連接線 -->
+                    <div class="absolute left-[27px] top-4 bottom-4 w-0.5 bg-gray-200"></div>
+            `;
+
+            // Generate items
+            html += dayData.events.map(event => {
+                const colorClass = getColor(event.type);
+                const iconClass = getIcon(event.type);
+                
+                return `
+                    <div class="relative flex gap-4 items-start z-10">
+                        <!-- Icon Bubble -->
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full ${colorClass} flex items-center justify-center border-2 border-white shadow-sm z-10">
+                            <i class="fas ${iconClass} text-xs"></i>
+                        </div>
+                        
+                        <!-- Content Card -->
+                        <div class="flex-1 bg-white p-3.5 rounded-2xl shadow-sm border border-gray-50">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-gray-800 text-sm">${event.title}</h3>
+                                <span class="text-xs font-semibold text-rose-400 bg-rose-50 px-2 py-0.5 rounded-md">${event.time}</span>
+                            </div>
+                            
+                            ${event.isComplex ? event.content : `<p class="text-xs text-gray-500 leading-relaxed">${event.desc}</p>`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function switchDay(id) {
+            currentDayId = id;
+            renderTabs();
+            renderContent();
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTabs();
+            renderContent();
+            
+            // Add simple animations styles
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+                .animate-slide-up { animation: slideUp 0.4s ease-out; }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
